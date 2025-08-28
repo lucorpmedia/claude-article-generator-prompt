@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Article Generator | Cyberpunk Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0a0a0a;
+            background-image: 
+                radial-gradient(ellipse at top left, rgba(255, 0, 128, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            color: #fff;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 0, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: grid-move 20s linear infinite;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            box-shadow: 
+                0 0 40px rgba(255, 0, 255, 0.2),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glowing corners */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.6;
+            animation: pulse 4s ease-in-out infinite alternate;
+        }
+
+        .container::before {
+            top: -50px;
+            left: -50px;
+            background: #ff0080;
+        }
+
+        .container::after {
+            bottom: -50px;
+            right: -50px;
+            background: #00ffff;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0.3; transform: scale(1.2); }
+        }
+
+        h1 {
+            background: linear-gradient(45deg, #ff0080, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #00ffff;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: rgba(0, 20, 40, 0.6);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+            background: rgba(0, 30, 50, 0.8);
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff0080, #7000ff);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 0, 128, 0.4);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 30px rgba(255, 0, 128, 0.6),
+                0 0 40px rgba(255, 0, 128, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .output-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid rgba(255, 0, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .output-section h2 {
+            color: #ff0080;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .output-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            min-height: 200px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #0ff;
+            box-shadow: 
+                inset 0 0 20px rgba(0, 255, 255, 0.1),
+                0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .copy-button {
+            background: linear-gradient(45deg, #00ff88, #00ffff);
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .copy-button:hover {
+            box-shadow: 
+                0 6px 30px rgba(0, 255, 136, 0.6),
+                0 0 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .success-message {
+            color: #00ff88;
+            margin-top: 15px;
+            display: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        .instructions {
+            background: rgba(0, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-left: 4px solid #00ffff;
+            backdrop-filter: blur(5px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .detected-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #00ffff;
+            display: none;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .error-message {
+            background: rgba(255, 0, 80, 0.1);
+            color: #ff0080;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid rgba(255, 0, 80, 0.3);
+            text-shadow: 0 0 10px rgba(255, 0, 80, 0.5);
+        }
+
+        /* Glitch effect for h1 */
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 30px rgba(255, 0, 255, 0.5); }
+            25% { text-shadow: -2px 0 #ff0080, 2px 0 #00ffff, 0 0 30px rgba(255, 0, 255, 0.5); }
+            50% { text-shadow: 2px 0 #ff0080, -2px 0 #00ffff, 0 0 30px rgba(255, 0, 255, 0.5); }
+            75% { text-shadow: 0 0 30px rgba(255, 0, 255, 0.5); }
+        }
+
+        h1:hover {
+            animation: glitch 0.3s infinite;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            button {
+                font-size: 16px;
+                padding: 12px 30px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff0080, #00ffff);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #ff0080, #00ff88);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Claude Article Generator</h1>
+        <p class="subtitle">Transform your Perplexity outline into a full SEO-optimized article</p>
+        
+        <div class="instructions">
+            <h3>[ INSTRUCTIONS ]</h3>
+            <ol>
+                <li>Copy your complete outline from Perplexity (including the word count range)</li>
+                <li>Paste it in the text area below</li>
+                <li>Click "Generate Prompt" - the tool will automatically detect the word count</li>
+                <li>Copy the generated prompt and paste it into Claude</li>
+            </ol>
+        </div>
+
+        <div class="input-group">
+            <label for="outline">[ PASTE YOUR PERPLEXITY OUTLINE ]</label>
+            <textarea id="outline" placeholder="Paste your complete outline from Perplexity here (make sure it includes the word count range)..."></textarea>
+            <div class="detected-info" id="detectedInfo"></div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <button onclick="generatePrompt()">[ GENERATE PROMPT ]</button>
+
+        <div class="output-section" id="outputSection" style="display: none;">
+            <h2>[ GENERATED PROMPT ]</h2>
+            <div class="output-box" id="output"></div>
+            <button class="copy-button" onclick="copyToClipboard()">[ COPY TO CLIPBOARD ]</button>
+            <p class="success-message" id="successMessage">✓ COPIED TO CLIPBOARD</p>
+        </div>
+    </div>
+
+    <script>
+        function detectWordCountRange(text) {
+            // Common patterns for word count ranges in various formats
+            const patterns = [
+                /(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)\s*words?/i,
+                /(\d{1,}[,\d]*)\s*to\s*(\d{1,}[,\d]*)\s*words?/i,
+                /word\s*count:?\s*(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)/i,
+                /(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)\s*word/i,
+                /(\d{1,}[,\d]*)\s*-\s*(\d{1,}[,\d]*)/i,
+                /(\d{1,}[,\d]*)\s*–\s*(\d{1,}[,\d]*)/i,
+                /(\d{1,}[,\d]*)\s*—\s*(\d{1,}[,\d]*)/i
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    // Remove commas and convert to numbers
+                    const min = parseInt(match[1].replace(/,/g, ''));
+                    const max = parseInt(match[2].replace(/,/g, ''));
+                    
+                    if (!isNaN(min) && !isNaN(max) && min > 0 && max > 0 && max >= min) {
+                        return { min, max, found: true };
+                    }
+                }
+            }
+
+            return { found: false };
+        }
+
+        function selectWordCountInRange(min, max) {
+            // Calculate all possible hundreds within the range
+            const startHundred = Math.ceil(min / 100) * 100;
+            const endHundred = Math.floor(max / 100) * 100;
+            
+            const options = [];
+            
+            // Add the minimum if it's already a round hundred
+            if (min % 100 === 0) {
+                options.push(min);
+            }
+            
+            // Add all hundreds in between
+            for (let i = startHundred; i <= endHundred; i += 100) {
+                if (i >= min && i <= max && !options.includes(i)) {
+                    options.push(i);
+                }
+            }
+            
+            // Add the maximum if it's already a round hundred and not already included
+            if (max % 100 === 0 && !options.includes(max)) {
+                options.push(max);
+            }
+            
+            // If no round hundreds in range, pick the middle and round
+            if (options.length === 0) {
+                const middle = (min + max) / 2;
+                return Math.round(middle / 100) * 100;
+            }
+            
+            // Pick a random option from the available hundreds
+            const randomIndex = Math.floor(Math.random() * options.length);
+            return options[randomIndex];
+        }
+
+        function generatePrompt() {
+            const outlineInput = document.getElementById('outline').value.trim();
+            const detectedInfo = document.getElementById('detectedInfo');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Reset messages
+            detectedInfo.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            if (!outlineInput) {
+                errorMessage.textContent = '[ ERROR ] Please paste your outline from Perplexity';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Detect word count range
+            const wordCountData = detectWordCountRange(outlineInput);
+            
+            if (!wordCountData.found) {
+                errorMessage.textContent = '[ ERROR ] Could not detect word count range in the outline. Please make sure your Perplexity outline includes the word count range (e.g., "1,500-2,000 words")';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Select a word count within the range
+            const selectedWordCount = selectWordCountInRange(wordCountData.min, wordCountData.max);
+            
+            // Show detected info
+            detectedInfo.textContent = `[ DETECTED ] Word count range: ${wordCountData.min.toLocaleString()}-${wordCountData.max.toLocaleString()} words | [ SELECTED ] ${selectedWordCount.toLocaleString()} words`;
+            detectedInfo.style.display = 'block';
+            
+            const prompt = `Act as an SEO expert and I need you to write me a ${selectedWordCount} word count article based on the following:
+make sure you include the affiliate disclosure at the top
+${outlineInput}`;
+            
+            document.getElementById('output').textContent = prompt;
+            document.getElementById('outputSection').style.display = 'block';
+            
+            // Scroll to output
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('output').textContent;
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>
