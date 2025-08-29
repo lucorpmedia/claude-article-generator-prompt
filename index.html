@@ -392,15 +392,22 @@
 
     <script>
         function detectWordCountRange(text) {
-            // Common patterns for word count ranges in various formats
+            // More flexible patterns to catch various word count formats
             const patterns = [
-                /(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)\s*words?/i,
-                /(\d{1,}[,\d]*)\s*to\s*(\d{1,}[,\d]*)\s*words?/i,
-                /word\s*count:?\s*(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)/i,
-                /(\d{1,}[,\d]*)\s*[-–—]\s*(\d{1,}[,\d]*)\s*word/i,
-                /(\d{1,}[,\d]*)\s*-\s*(\d{1,}[,\d]*)/i,
-                /(\d{1,}[,\d]*)\s*–\s*(\d{1,}[,\d]*)/i,
-                /(\d{1,}[,\d]*)\s*—\s*(\d{1,}[,\d]*)/i
+                // Standard patterns with "words"
+                /(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
+                /word\s*count[:\s]*(?:is\s*)?(?:between\s*)?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)/i,
+                /between\s*(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
+                
+                // Look for sentences containing "word count" and two numbers
+                /word\s*count[^.]*?(\d{1,}[,\d]*)[^0-9]+(\d{1,}[,\d]*)/i,
+                
+                // Look for two numbers in context of recommendations
+                /recommend[^.]*?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
+                /target[^.]*?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
+                
+                // Last resort: any two 3-4 digit numbers separated by common delimiters
+                /(\d{3,4}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{3,4}[,\d]*)/i
             ];
 
             for (const pattern of patterns) {
@@ -410,9 +417,21 @@
                     const min = parseInt(match[1].replace(/,/g, ''));
                     const max = parseInt(match[2].replace(/,/g, ''));
                     
-                    if (!isNaN(min) && !isNaN(max) && min > 0 && max > 0 && max >= min) {
+                    // Validate that these are reasonable word counts (between 100 and 50000)
+                    if (!isNaN(min) && !isNaN(max) && min >= 100 && max <= 50000 && max >= min) {
                         return { min, max, found: true };
                     }
+                }
+            }
+
+            // Special handling for the specific format in the example
+            // Look for "between X and Y words" in the full text
+            const betweenMatch = text.match(/between\s*(\d{1,}[,\d]*)\s*and\s*(\d{1,}[,\d]*)\s*words/i);
+            if (betweenMatch) {
+                const min = parseInt(betweenMatch[1].replace(/,/g, ''));
+                const max = parseInt(betweenMatch[2].replace(/,/g, ''));
+                if (!isNaN(min) && !isNaN(max) && min >= 100 && max <= 50000 && max >= min) {
+                    return { min, max, found: true };
                 }
             }
 
@@ -473,7 +492,7 @@
             const wordCountData = detectWordCountRange(outlineInput);
             
             if (!wordCountData.found) {
-                errorMessage.textContent = '[ ERROR ] Could not detect word count range in the outline. Please make sure your Perplexity outline includes the word count range (e.g., "1,500-2,000 words")';
+                errorMessage.textContent = '[ ERROR ] Could not detect word count range in the outline. Please make sure your Perplexity outline includes the word count range (e.g., "2,000 to 2,800 words" or "between 2000 and 2800 words")';
                 errorMessage.style.display = 'block';
                 return;
             }
@@ -487,7 +506,9 @@
             
             const prompt = `Act as an SEO expert and I need you to write me a ${selectedWordCount} word count article based on the following:
 make sure you include the affiliate disclosure at the top
-${outlineInput}`;
+${outlineInput}
+
+i know you can write reviews on this as there are plenty of information on the internet. i have given you the frame work and direction to write. please do it.`;
             
             document.getElementById('output').textContent = prompt;
             document.getElementById('outputSection').style.display = 'block';
