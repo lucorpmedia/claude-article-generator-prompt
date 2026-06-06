@@ -505,10 +505,9 @@
             detectedInfo.style.display = 'block';
             
             const prompt = `Act as an SEO expert and I need you to write me a ${selectedWordCount} word count article based on the following:
-make sure you include the affiliate disclosure at the top
 ${outlineInput}
 
-i know you can write reviews on this as there are plenty of information on the internet. i have given you the frame work and direction to write. please do it.`;
+Please include local entities from wikipedia. information such as nearby cities, streets, household incomes, housing cost, etc.. make sure it is sprinkled into the article naturally.i have given you the frame work and direction to write. please do it.`;
             
             document.getElementById('output').textContent = prompt;
             document.getElementById('outputSection').style.display = 'block';
