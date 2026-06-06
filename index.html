@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -382,11 +383,13 @@
 
         <button onclick="generatePrompt()">[ GENERATE PROMPT ]</button>
 
+        <!-- Copy button moved here: sits directly under the Generate button, hidden until a prompt is generated -->
+        <button class="copy-button" id="copyButton" onclick="copyToClipboard()" style="display: none;">[ COPY TO CLIPBOARD ]</button>
+        <p class="success-message" id="successMessage">✓ COPIED TO CLIPBOARD</p>
+
         <div class="output-section" id="outputSection" style="display: none;">
             <h2>[ GENERATED PROMPT ]</h2>
             <div class="output-box" id="output"></div>
-            <button class="copy-button" onclick="copyToClipboard()">[ COPY TO CLIPBOARD ]</button>
-            <p class="success-message" id="successMessage">✓ COPIED TO CLIPBOARD</p>
         </div>
     </div>
 
@@ -477,14 +480,18 @@
             const outlineInput = document.getElementById('outline').value.trim();
             const detectedInfo = document.getElementById('detectedInfo');
             const errorMessage = document.getElementById('errorMessage');
+            const copyButton = document.getElementById('copyButton');
             
             // Reset messages
             detectedInfo.style.display = 'none';
             errorMessage.style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
             
             if (!outlineInput) {
                 errorMessage.textContent = '[ ERROR ] Please paste your outline from Perplexity';
                 errorMessage.style.display = 'block';
+                copyButton.style.display = 'none';
+                document.getElementById('outputSection').style.display = 'none';
                 return;
             }
             
@@ -494,6 +501,8 @@
             if (!wordCountData.found) {
                 errorMessage.textContent = '[ ERROR ] Could not detect word count range in the outline. Please make sure your Perplexity outline includes the word count range (e.g., "2,000 to 2,800 words" or "between 2000 and 2800 words")';
                 errorMessage.style.display = 'block';
+                copyButton.style.display = 'none';
+                document.getElementById('outputSection').style.display = 'none';
                 return;
             }
             
@@ -511,6 +520,9 @@ Please include local entities from wikipedia. information such as nearby cities,
             
             document.getElementById('output').textContent = prompt;
             document.getElementById('outputSection').style.display = 'block';
+
+            // Reveal the copy button now that a prompt exists
+            copyButton.style.display = 'block';
             
             // Scroll to output
             document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
