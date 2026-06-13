@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claude Article Generator | Cyberpunk Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
         body {
             font-family: 'Orbitron', 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #0a0a0a;
-            background-image: 
+            background-image:
                 radial-gradient(ellipse at top left, rgba(255, 0, 128, 0.1) 0%, transparent 50%),
                 radial-gradient(ellipse at bottom right, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
                 linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 100%);
@@ -33,7 +33,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 0, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
@@ -54,7 +54,7 @@
             padding: 40px;
             border-radius: 20px;
             border: 1px solid rgba(255, 0, 255, 0.3);
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(255, 0, 255, 0.2),
                 inset 0 0 20px rgba(0, 255, 255, 0.1);
             position: relative;
@@ -96,7 +96,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-fill-color: transparent;
             margin-bottom: 10px;
             font-size: 32px;
             font-weight: 900;
@@ -147,7 +146,7 @@
         textarea:focus {
             outline: none;
             border-color: #00ffff;
-            box-shadow: 
+            box-shadow:
                 0 0 20px rgba(0, 255, 255, 0.5),
                 inset 0 0 10px rgba(0, 255, 255, 0.1);
             background: rgba(0, 30, 50, 0.8);
@@ -193,7 +192,7 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 
+            box-shadow:
                 0 6px 30px rgba(255, 0, 128, 0.6),
                 0 0 40px rgba(255, 0, 128, 0.4);
         }
@@ -235,7 +234,7 @@
             font-size: 14px;
             line-height: 1.6;
             color: #0ff;
-            box-shadow: 
+            box-shadow:
                 inset 0 0 20px rgba(0, 255, 255, 0.1),
                 0 0 20px rgba(0, 255, 255, 0.2);
         }
@@ -247,7 +246,7 @@
         }
 
         .copy-button:hover {
-            box-shadow: 
+            box-shadow:
                 0 6px 30px rgba(0, 255, 136, 0.6),
                 0 0 40px rgba(0, 255, 136, 0.4);
         }
@@ -327,11 +326,11 @@
             .container {
                 padding: 25px;
             }
-            
+
             h1 {
                 font-size: 24px;
             }
-            
+
             button {
                 font-size: 16px;
                 padding: 12px 30px;
@@ -357,13 +356,12 @@
             background: linear-gradient(45deg, #ff0080, #00ff88);
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h1>Claude Article Generator</h1>
         <p class="subtitle">Transform your Perplexity outline into a full SEO-optimized article</p>
-        
+
         <div class="instructions">
             <h3>[ INSTRUCTIONS ]</h3>
             <ol>
@@ -383,7 +381,7 @@
 
         <button onclick="generatePrompt()">[ GENERATE PROMPT ]</button>
 
-        <!-- Copy button moved here: sits directly under the Generate button, hidden until a prompt is generated -->
+        <!-- Copy button sits directly under the Generate button, hidden until a prompt is generated -->
         <button class="copy-button" id="copyButton" onclick="copyToClipboard()" style="display: none;">[ COPY TO CLIPBOARD ]</button>
         <p class="success-message" id="successMessage">✓ COPIED TO CLIPBOARD</p>
 
@@ -395,46 +393,33 @@
 
     <script>
         function detectWordCountRange(text) {
-            // More flexible patterns to catch various word count formats
+            // Patterns ordered most-specific to least-specific.
             const patterns = [
-                // Standard patterns with "words"
+                // Standard "X to Y words" / "X-Y words"
                 /(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
+                // "word count: X to Y"
                 /word\s*count[:\s]*(?:is\s*)?(?:between\s*)?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)/i,
+                // "between X and Y words"
                 /between\s*(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
-                
-                // Look for sentences containing "word count" and two numbers
+                // "word count ... X ... Y" (numbers near the phrase)
                 /word\s*count[^.]*?(\d{1,}[,\d]*)[^0-9]+(\d{1,}[,\d]*)/i,
-                
-                // Look for two numbers in context of recommendations
+                // "recommend X to Y words" / "target X to Y words"
                 /recommend[^.]*?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
                 /target[^.]*?(\d{1,}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{1,}[,\d]*)\s*words?/i,
-                
-                // Last resort: any two 3-4 digit numbers separated by common delimiters
+                // Last resort: any two 3-4 digit numbers separated by a common delimiter
                 /(\d{3,4}[,\d]*)\s*(?:[-–—]|to|and|through)\s*(\d{3,4}[,\d]*)/i
             ];
 
             for (const pattern of patterns) {
                 const match = text.match(pattern);
                 if (match) {
-                    // Remove commas and convert to numbers
-                    const min = parseInt(match[1].replace(/,/g, ''));
-                    const max = parseInt(match[2].replace(/,/g, ''));
-                    
-                    // Validate that these are reasonable word counts (between 100 and 50000)
+                    const min = parseInt(match[1].replace(/,/g, ''), 10);
+                    const max = parseInt(match[2].replace(/,/g, ''), 10);
+
+                    // Validate that these are reasonable word counts.
                     if (!isNaN(min) && !isNaN(max) && min >= 100 && max <= 50000 && max >= min) {
                         return { min, max, found: true };
                     }
-                }
-            }
-
-            // Special handling for the specific format in the example
-            // Look for "between X and Y words" in the full text
-            const betweenMatch = text.match(/between\s*(\d{1,}[,\d]*)\s*and\s*(\d{1,}[,\d]*)\s*words/i);
-            if (betweenMatch) {
-                const min = parseInt(betweenMatch[1].replace(/,/g, ''));
-                const max = parseInt(betweenMatch[2].replace(/,/g, ''));
-                if (!isNaN(min) && !isNaN(max) && min >= 100 && max <= 50000 && max >= min) {
-                    return { min, max, found: true };
                 }
             }
 
@@ -442,36 +427,32 @@
         }
 
         function selectWordCountInRange(min, max) {
-            // Calculate all possible hundreds within the range
             const startHundred = Math.ceil(min / 100) * 100;
             const endHundred = Math.floor(max / 100) * 100;
-            
+
             const options = [];
-            
-            // Add the minimum if it's already a round hundred
+
             if (min % 100 === 0) {
                 options.push(min);
             }
-            
-            // Add all hundreds in between
+
             for (let i = startHundred; i <= endHundred; i += 100) {
                 if (i >= min && i <= max && !options.includes(i)) {
                     options.push(i);
                 }
             }
-            
-            // Add the maximum if it's already a round hundred and not already included
+
             if (max % 100 === 0 && !options.includes(max)) {
                 options.push(max);
             }
-            
-            // If no round hundreds in range, pick the middle and round
+
+            // No round hundred fits inside the range: pick the midpoint,
+            // round to the nearest 50, and clamp so we never leave the range.
             if (options.length === 0) {
-                const middle = (min + max) / 2;
-                return Math.round(middle / 100) * 100;
+                const middle = Math.round((min + max) / 2 / 50) * 50;
+                return Math.max(min, Math.min(max, middle));
             }
-            
-            // Pick a random option from the available hundreds
+
             const randomIndex = Math.floor(Math.random() * options.length);
             return options[randomIndex];
         }
@@ -481,12 +462,12 @@
             const detectedInfo = document.getElementById('detectedInfo');
             const errorMessage = document.getElementById('errorMessage');
             const copyButton = document.getElementById('copyButton');
-            
+
             // Reset messages
             detectedInfo.style.display = 'none';
             errorMessage.style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
-            
+
             if (!outlineInput) {
                 errorMessage.textContent = '[ ERROR ] Please paste your outline from Perplexity';
                 errorMessage.style.display = 'block';
@@ -494,51 +475,64 @@
                 document.getElementById('outputSection').style.display = 'none';
                 return;
             }
-            
-            // Detect word count range
+
             const wordCountData = detectWordCountRange(outlineInput);
-            
+
             if (!wordCountData.found) {
-                errorMessage.textContent = '[ ERROR ] Could not detect word count range in the outline. Please make sure your Perplexity outline includes the word count range (e.g., "2,000 to 2,800 words" or "between 2000 and 2800 words")';
+                errorMessage.textContent = '[ ERROR ] Could not detect a word count range in the outline. Please make sure it includes one (e.g., "2,000 to 2,800 words" or "between 2000 and 2800 words")';
                 errorMessage.style.display = 'block';
                 copyButton.style.display = 'none';
                 document.getElementById('outputSection').style.display = 'none';
                 return;
             }
-            
-            // Select a word count within the range
+
             const selectedWordCount = selectWordCountInRange(wordCountData.min, wordCountData.max);
-            
-            // Show detected info
+
             detectedInfo.textContent = `[ DETECTED ] Word count range: ${wordCountData.min.toLocaleString()}-${wordCountData.max.toLocaleString()} words | [ SELECTED ] ${selectedWordCount.toLocaleString()} words`;
             detectedInfo.style.display = 'block';
-            
-            const prompt = `Act as an SEO expert and I need you to write me a ${selectedWordCount} word count article based on the following:
+
+            const prompt = `Act as an SEO expert and write a ${selectedWordCount}-word local business article based on the outline below. The goal is authoritative, trustworthy local content (E-E-A-T) optimized for featured snippets, voice search, and "near me" queries.
+
+OUTLINE:
 ${outlineInput}
 
-Please include local entities from wikipedia. information such as nearby cities, streets, household incomes, housing cost, etc.. make sure it is sprinkled into the article naturally.i have given you the frame work and direction to write. please do it.`;
-            
+1. LOCAL RELEVANCE
+Naturally weave in local entities sourced from Wikipedia: nearby cities, notable streets, median household income, housing costs, and similar area data. Sprinkle these in smoothly rather than listing them.
+
+2. STRUCTURE
+- Open with 1-2 short paragraphs introducing the service and the local area.
+- Follow with detailed service information.
+- Use tables to present service comparisons, pricing tiers, and service-area coverage.
+- Write headings and phrasing that can win featured snippets and voice-search results.
+
+3. FAQ
+Add an FAQ section answering common questions about the service and local area.
+
+4. SCHEMA MARKUP
+Include schema for: the FAQ section, local business details, service and pricing information, and service-area coverage.
+
+5. CREDIBILITY
+Support claims with relevant local statistics and cite research where appropriate.`;
+
             document.getElementById('output').textContent = prompt;
             document.getElementById('outputSection').style.display = 'block';
 
-            // Reveal the copy button now that a prompt exists
             copyButton.style.display = 'block';
-            
-            // Scroll to output
+
             document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         function copyToClipboard() {
             const outputText = document.getElementById('output').textContent;
-            
+
             navigator.clipboard.writeText(outputText).then(() => {
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'block';
-                
+
                 setTimeout(() => {
                     successMessage.style.display = 'none';
                 }, 3000);
-            }).catch(err => {
+            }).catch(() => {
                 alert('Failed to copy to clipboard. Please select and copy manually.');
             });
         }
